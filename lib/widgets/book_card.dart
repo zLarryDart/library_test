@@ -10,7 +10,7 @@ class BookCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bookService = Provider.of<BookService>(context, listen: false);
+    Provider.of<BookService>(context, listen: false);
 
     final coverUrl = book['cover_i'] != null
         ? 'https://covers.openlibrary.org/b/id/${book['cover_i']}-L.jpg'
@@ -36,8 +36,7 @@ class BookCard extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: Container(
           padding: const EdgeInsets.all(8.0),
-          width:
-              120, // Ajustar el ancho para asegurar que el contenido se ajuste
+          width: 120, // Ajustar el ancho del contenedor para evitar overflow
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -67,7 +66,7 @@ class BookCard extends StatelessWidget {
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize:
-                      12, // Ajustar el tamaño de fuente para evitar overflow
+                      12, // se ajusta el tamaño de fuente para evitar overflow
                 ),
               ),
               SizedBox(height: 4),

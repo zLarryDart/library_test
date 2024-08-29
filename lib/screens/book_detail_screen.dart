@@ -78,7 +78,7 @@ class BookDetailScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Implementar función para agregar a favoritos.
+          // función para agregar a favoritos.
         },
         child: Icon(Icons.favorite),
       ),

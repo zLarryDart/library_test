@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class BookService {
   final String baseUrl = 'https://openlibrary.org';
 
-  // Método para buscar libros de manera general
+  // Método para buscar libros de manera gen
   Future<List<dynamic>> searchBooks(String query,
       {int page = 1, int limit = 10}) async {
     final offset = (page - 1) * limit;
@@ -13,14 +13,13 @@ class BookService {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return data[
-          'docs']; // Ajusta esto según la estructura de datos devuelta por la API
+      return data['docs'];
     } else {
       throw Exception('Error fetching books');
     }
   }
 
-  // Método para obtener libros por categoría
+  // Método para obtener libros por cate
   Future<List<dynamic>> fetchBooksByCategory(String category,
       {int limit = 10}) async {
     final response = await http
@@ -28,8 +27,7 @@ class BookService {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return data[
-          'works']; // Ajusta esto según la estructura de datos devuelta por la API
+      return data['works'];
     } else {
       throw Exception('Error fetching books for category $category');
     }

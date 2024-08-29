@@ -45,7 +45,7 @@ class BookSearchScreen extends StatelessWidget {
                       crossAxisCount: 2,
                       crossAxisSpacing: 10.0,
                       mainAxisSpacing: 10.0,
-                      childAspectRatio: 4 / 6, // Proporción ajustada
+                      childAspectRatio: 4 / 6,
                     ),
                     itemCount: bookViewModel.books.length,
                     itemBuilder: (context, index) {
