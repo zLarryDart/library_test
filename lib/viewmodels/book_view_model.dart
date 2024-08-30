@@ -5,11 +5,13 @@ class BookViewModel extends ChangeNotifier {
   final BookService _bookService = BookService();
   List<dynamic> _books = [];
   bool _isLoading = false;
+  bool _isLoadingMore = false; // Nueva bandera para la carga de más datos
   int _currentPage = 1;
   String _currentQuery = "";
 
   List<dynamic> get books => _books;
   bool get isLoading => _isLoading;
+  bool get isLoadingMore => _isLoadingMore; // Getter para la nueva bandera
   int get currentPage => _currentPage;
 
   Future<void> searchBooks(String query,
@@ -17,14 +19,13 @@ class BookViewModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    _currentQuery = query; // Guardar la query actual
+    _currentQuery = query;
 
     try {
       final results = await _bookService.searchBooks(query, page: page);
       _books = results;
       _currentPage = page;
     } catch (e) {
-      // Manejo de errores
       print(e);
     } finally {
       _isLoading = false;
@@ -32,16 +33,22 @@ class BookViewModel extends ChangeNotifier {
     }
   }
 
-  void nextPage() {
+  Future<void> nextPage() async {
     if (_books.isNotEmpty) {
-      // Asegurarse de que hay resultados antes de avanzar
-      searchBooks(_currentQuery, page: _currentPage + 1, category: '');
-    }
-  }
+      _isLoadingMore = true;
+      notifyListeners();
 
-  void previousPage() {
-    if (_currentPage > 1) {
-      searchBooks(_currentQuery, page: _currentPage - 1, category: '');
+      try {
+        final results = await _bookService.searchBooks(_currentQuery,
+            page: _currentPage + 1);
+        _books.addAll(results);
+        _currentPage++;
+      } catch (e) {
+        print(e);
+      } finally {
+        _isLoadingMore = false;
+        notifyListeners();
+      }
     }
   }
 }

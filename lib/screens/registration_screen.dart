@@ -37,11 +37,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       await prefs.setString('lastName', _lastName);
       await prefs.setString('phone', _phone);
       await prefs.setString('email', _email);
-      await prefs.setString('password', _password); // Guardamos la contraseña
-      await prefs.setString(
-          'birthDate',
-          _birthDate!
-              .toIso8601String()); // Guardamos la fecha en formato ISO 8601
+      await prefs.setString('password', _password);
+      await prefs.setString('birthDate', _birthDate!.toIso8601String());
       await prefs.setInt('age', _age!);
       await prefs.setString('gender', _gender!);
       Navigator.pushReplacementNamed(context, '/login');
@@ -66,138 +63,198 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Register")),
+      appBar: AppBar(title: const Text("Registro")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(
-                decoration: InputDecoration(labelText: "First Name"),
+              _buildTextFormField(
+                label: "Nombre",
                 validator: (value) {
                   if (value == null ||
                       value.isEmpty ||
                       !RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-                    return 'Please enter a valid first name';
+                    return 'Por favor, ingrese un nombre válido';
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _firstName = value!;
-                },
+                onSaved: (value) => _firstName = value!,
               ),
-              TextFormField(
-                decoration: InputDecoration(labelText: "Last Name"),
+              _buildTextFormField(
+                label: "Apellido",
                 validator: (value) {
                   if (value == null ||
                       value.isEmpty ||
                       !RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-                    return 'Please enter a valid last name';
+                    return 'Por favor, ingrese un apellido válido';
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _lastName = value!;
-                },
+                onSaved: (value) => _lastName = value!,
               ),
-              TextFormField(
-                decoration: InputDecoration(labelText: "Phone"),
+              _buildTextFormField(
+                label: "Teléfono",
                 keyboardType: TextInputType.phone,
                 validator: (value) {
                   if (value == null ||
                       value.isEmpty ||
                       !RegExp(r'^\d{10}$').hasMatch(value)) {
-                    return 'Please enter a valid phone number';
+                    return 'Por favor, ingrese un número de teléfono válido';
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _phone = value!;
-                },
+                onSaved: (value) => _phone = value!,
               ),
-              TextFormField(
-                decoration: InputDecoration(labelText: "Email"),
+              _buildTextFormField(
+                label: "Correo electrónico",
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null ||
                       value.isEmpty ||
                       !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
                           .hasMatch(value)) {
-                    return 'Please enter a valid email';
+                    return 'Por favor, ingrese un correo electrónico válido';
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _email = value!;
-                },
+                onSaved: (value) => _email = value!,
               ),
-              TextFormField(
-                decoration: InputDecoration(labelText: "Password"),
+              _buildTextFormField(
+                label: "Contraseña",
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
+                    return 'Por favor, ingrese su contraseña';
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _password = value!;
-                },
+                onSaved: (value) => _password = value!,
               ),
-              TextFormField(
-                readOnly: true,
-                decoration: InputDecoration(
-                  labelText: "Birth Date",
-                  hintText: _birthDate == null
-                      ? 'Select your birth date'
-                      : DateFormat('yyyy-MM-dd').format(_birthDate!),
-                ),
-                onTap: () {
-                  _selectBirthDate(context);
-                },
-                validator: (value) {
-                  if (_birthDate == null) {
-                    return 'Please select your birth date';
-                  }
-                  return null;
-                },
+              _buildBirthDateField(context),
+              _buildDisabledTextFormField(
+                label: "Edad",
+                hintText: _age?.toString() ?? '',
               ),
-              TextFormField(
-                enabled: false,
-                decoration: InputDecoration(
-                  labelText: "Age",
-                  hintText: _age?.toString() ?? '',
-                ),
-              ),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: "Gender"),
-                items: ['Male', 'Female', 'Other'].map((String gender) {
-                  return DropdownMenuItem<String>(
-                    value: gender,
-                    child: Text(gender),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _gender = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please select a gender';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
+              _buildGenderField(),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _saveForm,
-                child: Text('Save'),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Guardar'),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextFormField({
+    required String label,
+    required FormFieldValidator<String> validator,
+    required FormFieldSetter<String> onSaved,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        keyboardType: keyboardType,
+        obscureText: obscureText,
+        validator: validator,
+        onSaved: onSaved,
+      ),
+    );
+  }
+
+  Widget _buildBirthDateField(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        readOnly: true,
+        decoration: InputDecoration(
+          labelText: "Fecha de nacimiento",
+          hintText: _birthDate == null
+              ? 'Seleccione su fecha de nacimiento'
+              : DateFormat('yyyy-MM-dd').format(_birthDate!),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onTap: () => _selectBirthDate(context),
+        validator: (value) {
+          if (_birthDate == null) {
+            return 'Por favor, seleccione su fecha de nacimiento';
+          }
+          return null;
+        },
+        controller: TextEditingController(
+          text: _birthDate != null
+              ? DateFormat('yyyy-MM-dd').format(_birthDate!)
+              : '',
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDisabledTextFormField({
+    required String label,
+    required String hintText,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        enabled: false,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hintText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGenderField() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          labelText: "Género",
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        items: ['Masculino', 'Femenino', 'Otro'].map((String gender) {
+          return DropdownMenuItem<String>(
+            value: gender,
+            child: Text(gender),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            _gender = value;
+          });
+        },
+        validator: (value) {
+          if (value == null) {
+            return 'Por favor, seleccione un género';
+          }
+          return null;
+        },
       ),
     );
   }

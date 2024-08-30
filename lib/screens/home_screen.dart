@@ -5,7 +5,7 @@ import 'package:prixz_test/widgets/book_card.dart';
 import 'package:prixz_test/screens/book_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  final List<String> categories = [
+  final List<String> categories = const [
     'classics',
     'loved',
     'romantic',
@@ -18,7 +18,7 @@ class HomeScreen extends StatelessWidget {
     'science_fiction',
   ];
 
-  final Map<String, String> categoryTitles = {
+  final Map<String, String> categoryTitles = const {
     'classics': 'Libros Clásicos',
     'loved': 'Libros que Amamos',
     'romantic': 'Romántico',
@@ -35,14 +35,59 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Book Library"),
-      ),
+          iconTheme: const IconThemeData(color: Colors.black),
+          title: const Column(
+            children: [
+              Text(
+                'Book Library',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.white,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.shopping_cart),
+              onPressed: () {
+                Navigator.pushNamed(context, '/cart');
+              },
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(50),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Buscar libros',
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+                onSubmitted: (query) {
+                  Navigator.pushNamed(context, '/search', arguments: query);
+                },
+              ),
+            ),
+          )),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(
           itemCount: categories.length,
           itemBuilder: (context, index) {
-            return _buildCategorySection(context, categories[index]);
+            return CategorySection(
+              category: categories[index],
+              title: categoryTitles[categories[index]]!,
+            );
           },
         ),
       ),
@@ -50,38 +95,38 @@ class HomeScreen extends StatelessWidget {
         onPressed: () {
           Navigator.pushNamed(context, '/search');
         },
-        child: Icon(Icons.search),
+        child: const Icon(Icons.search),
         elevation: 5,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
+        shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             IconButton(
-              icon: Icon(Icons.home),
+              icon: const Icon(Icons.home),
               onPressed: () {
                 // Ya estás en HomeScreen
               },
             ),
             IconButton(
-              icon: Icon(Icons.favorite),
+              icon: const Icon(Icons.favorite),
               onPressed: () {
                 Navigator.pushNamed(context, '/favorites');
               },
             ),
-            SizedBox(width: 48), // Espacio para el FAB
+            const SizedBox(width: 48), // Espacio para el FAB
             IconButton(
-              icon: Icon(Icons.upload_file),
+              icon: const Icon(Icons.upload_file),
               onPressed: () {
                 Navigator.pushNamed(context, '/my_books');
               },
             ),
             IconButton(
-              icon: Icon(Icons.person),
+              icon: const Icon(Icons.person),
               onPressed: () {
                 Navigator.pushNamed(context, '/login');
               },
@@ -91,31 +136,43 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildCategorySection(BuildContext context, String category) {
+class CategorySection extends StatelessWidget {
+  final String category;
+  final String title;
+
+  const CategorySection({required this.category, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder(
       future: Provider.of<BookService>(context, listen: false)
           .fetchBooksByCategory(category),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingCategory(category);
+          return LoadingCategory(title: title);
         } else if (snapshot.hasError) {
           return Center(
-              child: Text('Error cargando ${categoryTitles[category]}'));
+            child: Text('Error cargando $title'),
+          );
         } else if (!snapshot.hasData || (snapshot.data as List).isEmpty) {
           return Center(
-              child: Text(
-                  'No se encontraron libros para ${categoryTitles[category]}'));
+            child: Text('No se encontraron libros para $title'),
+          );
         } else {
           final books = snapshot.data as List<dynamic>;
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                categoryTitles[category]!,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                title,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Container(
                 height: 250,
                 child: ListView.builder(
@@ -128,8 +185,9 @@ class HomeScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                BookDetailScreen(book: books[index]),
+                            builder: (context) => BookDetailScreen(
+                              book: books[index],
+                            ),
                           ),
                         );
                       },
@@ -137,28 +195,38 @@ class HomeScreen extends StatelessWidget {
                   },
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           );
         }
       },
     );
   }
+}
 
-  Widget _buildLoadingCategory(String category) {
+class LoadingCategory extends StatelessWidget {
+  final String title;
+
+  const LoadingCategory({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          categoryTitles[category]!,
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          title,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Container(
           height: 150,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            itemCount: 5, // Número de placeholders
+            itemCount: 5,
             itemBuilder: (context, index) {
               return Container(
                 width: 110,
@@ -169,10 +237,10 @@ class HomeScreen extends StatelessWidget {
                 ),
               );
             },
-            separatorBuilder: (context, index) => SizedBox(width: 10),
+            separatorBuilder: (context, index) => const SizedBox(width: 10),
           ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
       ],
     );
   }

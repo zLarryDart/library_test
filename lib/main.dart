@@ -32,10 +32,13 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        fontFamily: 'Montserrat',
       ),
       home: HomeScreen(),
       routes: {
         '/login': (context) => LoginScreen(),
+        '/home': (context) => HomeScreen(),
         '/register': (context) => RegistrationScreen(),
         '/search': (context) => BookSearchScreen(),
         '/favorites': (context) => FavoritesScreen(),

@@ -15,8 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     final prefs = await SharedPreferences.getInstance();
     final storedEmail = prefs.getString('email');
-    final storedPassword =
-        prefs.getString('password'); // Obtenemos la contraseña almacenada
+    final storedPassword = prefs.getString('password');
 
     if (_email == storedEmail && _password == storedPassword) {
       Navigator.pushReplacementNamed(context, '/home');
@@ -38,63 +37,97 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TextFormField(
-                decoration: InputDecoration(labelText: "Email"),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null ||
-                      value.isEmpty ||
-                      !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                          .hasMatch(value)) {
-                    return 'Please enter a valid email';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _email = value!;
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: "Password"),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _password = value!;
-                },
-              ),
-              if (_loginFailed)
-                Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: Text(
-                    "Login failed. Please check your credentials.",
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ),
+              _buildEmailField(),
+              SizedBox(height: 16),
+              _buildPasswordField(),
+              if (_loginFailed) _buildLoginFailedMessage(),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    _login();
-                  }
-                },
-                child: Text("Login"),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/register');
-                },
-                child: Text("Don't have an account? Register"),
-              ),
+              _buildLoginButton(),
+              _buildRegisterButton(),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildEmailField() {
+    return TextFormField(
+      decoration: InputDecoration(
+        labelText: "Email",
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+      keyboardType: TextInputType.emailAddress,
+      validator: (value) {
+        if (value == null ||
+            value.isEmpty ||
+            !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+          return 'Please enter a valid email';
+        }
+        return null;
+      },
+      onSaved: (value) {
+        _email = value!;
+      },
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return TextFormField(
+      decoration: InputDecoration(
+        labelText: "Password",
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+      obscureText: true,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your password';
+        }
+        return null;
+      },
+      onSaved: (value) {
+        _password = value!;
+      },
+    );
+  }
+
+  Widget _buildLoginFailedMessage() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10.0),
+      child: Text(
+        "Login failed. Please check your credentials.",
+        style: TextStyle(color: Colors.red),
+      ),
+    );
+  }
+
+  Widget _buildLoginButton() {
+    return ElevatedButton(
+      onPressed: () {
+        if (_formKey.currentState!.validate()) {
+          _formKey.currentState!.save();
+          _login();
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      child: Text("Login"),
+    );
+  }
+
+  Widget _buildRegisterButton() {
+    return TextButton(
+      onPressed: () {
+        Navigator.pushNamed(context, '/register');
+      },
+      child: Text("Don't have an account? Register"),
     );
   }
 }
